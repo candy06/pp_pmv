@@ -42,7 +42,7 @@ int number_of_processes,
     sizeOfSubmatrix;
 
 int vector[2];
-int matrix[16];
+int matrix[9];
 int * tmp = NULL;
 int * submatrix = NULL;
 
@@ -111,7 +111,7 @@ void init()
   nextNode = (current_processID + 1) % number_of_processes;
   previousNode = (current_processID - 1 + number_of_processes) % number_of_processes;
   lastNode = (ROOT_PROCESS_ID + number_of_processes - 1) % number_of_processes;
-  sizeOfSubmatrix = 16 / number_of_processes;
+  sizeOfSubmatrix = 9 / number_of_processes;
   submatrix = malloc(sizeOfSubmatrix * sizeof(int));
   tmp = malloc(sizeOfSubmatrix * sizeof(int));
 }
@@ -156,7 +156,7 @@ void scatter(int * dataSource, int size_of_the_dataSource, int * dataDestination
 {
 
   if (current_processID == ROOT_PROCESS_ID) {
-    for (int i = size_of_the_dataDestination ; i < size_of_the_dataSource ; i++) {
+    for (int i = size_of_the_dataDestination ; i < size_of_the_dataSource ; i += size_of_the_dataDestination) {
       MPI_Send(&dataSource[i], size_of_the_dataDestination, MPI_INT, nextNode, 0, MPI_COMM_WORLD);
     }
     submatrix = &dataSource[current_processID];
@@ -208,19 +208,19 @@ int main(int argc, char const *argv[])
     matrix[6] = 4;
     matrix[7] = 40;
     matrix[8] = 5;
-
-    matrix[9] = 50;
-    matrix[10] = 6;
-    matrix[11] = 60;
-    matrix[12] = 7;
-    matrix[13] = 70;
-    matrix[14] = 8;
-    matrix[15] = 80;
-    displayMatrix(matrix, 16);
+    //
+    // matrix[9] = 50;
+    // matrix[10] = 6;
+    // matrix[11] = 60;
+    // matrix[12] = 7;
+    // matrix[13] = 70;
+    // matrix[14] = 8;
+    // matrix[15] = 80;
+    displayMatrix(matrix, 9);
   }
 
   //broadcast(vector, 2);
-  scatter(matrix, 16, submatrix, sizeOfSubmatrix);
+  scatter(matrix, 9, submatrix, sizeOfSubmatrix);
   // displayVector(vector, 2);
 
   displayMatrix(submatrix, sizeOfSubmatrix);
