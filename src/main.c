@@ -41,8 +41,11 @@ int number_of_processes,
     lastNode,
     sizeOfSubmatrix;
 
-int vector[2];
+int resultProc;
+
+int vector[3];
 int matrix[9];
+int result[3];
 int * tmp = NULL;
 int * submatrix = NULL;
 
@@ -171,6 +174,32 @@ void scatter(int * dataSource, int size_of_the_dataSource, int * dataDestination
 
 }
 
+/*
+********************************************************************************
+*                                   compute()
+*
+*
+* Description : do the product between matrix and vector
+* Arguments : matrix; vector; sizeofmatrix; sizeofvector
+* Return : void
+********************************************************************************
+*/
+
+void compute(int * matrix, int size_of_matrix, int * vector, int size_of_vector, int current_processID)
+{
+  for (int i = 0 ; i < size_of_matrix ; i++) {
+      resultProc +=(matrix[i] * vector[i]);
+  }
+  //printf("Result = %d\n", resultProc);
+}
+
+void gather(int * result, int tmpResult, int nbEltPerSubResults) {
+  if (current_processID == ROOT_PROCESS_ID) {
+    MPI_Recv(result, nbEltPerSubResults, MPI_INT, previousNode, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  } else {
+
+  }
+}
 
 /*
 ********************************************************************************
@@ -197,6 +226,7 @@ int main(int argc, char const *argv[])
     // Initialize the vector
     vector[0] = 5;
     vector[1] = 12;
+    vector[2] = 1;
     // Initialize the matrix
     matrix[0] = 1;
     matrix[1] = 10;
@@ -219,11 +249,19 @@ int main(int argc, char const *argv[])
     displayMatrix(matrix, 9);
   }
 
-  //broadcast(vector, 2);
+  broadcast(vector, 3);
   scatter(matrix, 9, submatrix, sizeOfSubmatrix);
-  // displayVector(vector, 2);
+  //displayVector(vector, 3);
 
-  displayMatrix(submatrix, sizeOfSubmatrix);
+  //displayMatrix(submatrix, sizeOfSubmatrix);
+  compute(submatrix, sizeOfSubmatrix, vector, 3, current_processID);
+
+  // TODO need to be modified with a personnal method for gathering
+  MPI_Gather(&resultProc, 1, MPI_INT, result, 1, MPI_INT, ROOT_PROCESS_ID, MPI_COMM_WORLD);
+  if (current_processID == ROOT_PROCESS_ID) {
+    displayVector(result, 3);
+  }
+
   // printf("Taille de chaque sous-matrices = %d\n", sizeOfSubmatrix);
   // printf("ProcessID: %d | nextNode = %d - previousNode = %d - lastNode = %d\n", current_processID, nextNode, previousNode, lastNode);
 
